@@ -1,36 +1,6 @@
 
-#### Loading Libraries 
 
-
-```python
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-from moviepy.editor import VideoFileClip
-from queue import Queue
-```
-
-#### Loading Chessboard Images for Calibration
-
-
-```python
-f,axes= plt.subplots(4,5, figsize=(24,9))
-row=0
-col=0
-distorted=[]
-print("Distorted Chess Board Images")
-for i in range(20):
-    image= cv2.imread("./camera_cal/calibration"+str(i+1)+".jpg")
-    distorted.append(image)
-    axes[row,col].imshow(image)
-    col+=1
-    if(col==5):
-        col=0
-        row+=1
-    
-```
-
-    Distorted Chess Board Images
+#### Distorted Chess Board Images
     
 
 
@@ -39,143 +9,26 @@ for i in range(20):
 
 #### Camera Calibration
 
-
-```python
-f,axes= plt.subplots(1,4, figsize=(15,15))
-print("Corners plotted Images")
-row=0
-nx=9
-ny=6
-objpoints=[]
-imgpoints=[]
-objp=np.zeros((nx*ny,3),np.float32)
-objp[:,:2]= np.mgrid[0:nx,0:ny].T.reshape(-1,2)
-
-for image in distorted:
+    Images after plotting chessboard corners
     
-    gray= cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    ret, corners= cv2.findChessboardCorners(gray, (nx, ny), None)
-    
-    if(ret):
-        objpoints.append(objp)
-        imgpoints.append(corners)
-        if row>3:
-            continue
-        cv2.drawChessboardCorners(image,(nx,ny), corners, ret)
-        axes[row].imshow(image)
-        row+=1
-```
-
-    Corners plotted Images
-    
-
-
 ![png](output_5_1.png)
 
 
-
-```python
-image_test= cv2.cvtColor(cv2.imread("./camera_cal/calibration1.jpg"),cv2.COLOR_BGR2RGB)
-y=image_test.shape[0]
-x=image_test.shape[1]
-_,mtx,dist,_,_= cv2.calibrateCamera(objpoints, imgpoints,(y,x),None,None)
-undistorted_image= cv2.undistort(image_test,mtx,dist, None, mtx)
-f,axes= plt.subplots(1,2, figsize=(24,9))
-axes[0].imshow(image_test)
-axes[1].imshow(undistorted_image)
-
-
-```
-
-
-
-
-    <matplotlib.image.AxesImage at 0x2210b6a5860>
-
-
-
+    Original and calibrated images
 
 ![png](output_6_1.png)
 
 
 #### Undistortion
 
-
-```python
-image_test1= cv2.imread("./test_images/straight_lines1.jpg")
-image_test2= cv2.imread("./test_images/test1.jpg")
-image_test3= cv2.imread("./test_images/test4.jpg")
-image_test4= cv2.imread("./test_images/test6.jpg")
-image_test5= cv2.imread("./test_images/test2.jpg")
-image_test6= cv2.imread("./test_images/test3.jpg")
-image_test7= cv2.imread("./test_images/test5.jpg")
-test_images=[image_test1,image_test2,image_test3,image_test4,image_test5,image_test6,image_test7]
-row=0
-f,axes= plt.subplots(len(test_images),2, figsize=(20,20))
-f.subplots_adjust(hspace=0.5)
-print("Distortion correction on test images")
-def undistort(img):
-    return cv2.undistort(img,mtx,dist, None, mtx)
-
-for image in test_images:
-    image= cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
-    y=image.shape[0]
-    x=image.shape[1]
-    axes[row,0].set_title('Original Image '+str(row+1))
-    axes[row,0].imshow(image)
-    undistorted_image= undistort(image)
-    axes[row,1].imshow(undistorted_image)
-    axes[row,1].set_title('Undistorted')
-    row+=1
-```
-
-    Distortion correction on test images
-    
-
+    Some Images after Distortion Correction. These are some examples of the undistorted Images
 
 ![png](output_8_1.png)
 
 
 #### Perspective transform
 
-
-```python
-offset=200
-height, width= image_test1.shape[0], image_test1.shape[1]
-src=np.float32([(593,450),(700,450),(1200,700),(200,700)])
-dst=np.float32([(offset,0),(width-offset,0),(width-offset,height),(offset,height)])
-def unwarp_image(img):
-    img_size = (img.shape[1], img.shape[0])
-    M= cv2.getPerspectiveTransform(src, dst) 
-    inv= cv2.getPerspectiveTransform(dst, src)
-    warped= cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
-    return warped,inv
-
-def reverse_warping(img,M):
-    img_size = (img.shape[1], img.shape[0])
-    unwarped= cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
-    return unwarped
-
-f,axes= plt.subplots(len(test_images),2, figsize=(20,20))
-f.subplots_adjust(hspace=0.5)
-row=0
-Unwarped_images=[]
-
-def ConvertBGRtoRGB(img):
-    return cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-
-for image in test_images:
-    image= ConvertBGRtoRGB(image)
-    unwarped_image,inv= unwarp_image(image)
-    Unwarped_images.append(unwarped_image)
-    y=image.shape[0]
-    x=image.shape[1]
-    axes[row,0].imshow(image)
-    axes[row,0].set_title('Original image '+str(row+1))
-    axes[row,1].imshow(unwarped_image)
-    axes[row,1].set_title("Bird's eye view")
-    row+=1    
-```
+    Warping the Images leads to bird's eye view of the lane. These are some examples of the perspective transformed Images
 
 
 ![png](output_10_0.png)
@@ -183,27 +36,7 @@ for image in test_images:
 
 #### Experimenting on various colorSpaces
 
-
-```python
-row=0
-sample_unwarped_image=Unwarped_images[3] ##  test4.jpg : This image has dark and bright portions and will be good to observe
-titles=[['R','G','B'],['H','L','S'],['H','S','V'],['Y','Cr','Cb'],['L','a','b']]
-color_spaces=[cv2.COLOR_RGB2HLS,cv2.COLOR_RGB2HSV, cv2.COLOR_RGB2YCrCb, cv2.COLOR_RGB2Lab]
-f,axes= plt.subplots(len(color_spaces)+1,4, figsize=(15,10))
-f.subplots_adjust(hspace =0.5)
-colorspace= None
-for index in range(len(color_spaces)+1):
-    if(index==0):
-        colorspace= sample_unwarped_image
-    else:
-        colorspace= cv2.cvtColor(sample_unwarped_image,color_spaces[index-1])
-    axes[index,0].imshow(sample_unwarped_image)
-    axes[index,0].set_title(''.join(titles[index]) +' conversion')
-    for channel in range(3):
-        this_channel= colorspace[:,:,channel]
-        axes[index,channel+1].imshow(this_channel,cmap='gray')
-        axes[index,channel+1].set_title(titles[index][channel]+' channel')
-```
+    
 
 
 ![png](output_12_0.png)
