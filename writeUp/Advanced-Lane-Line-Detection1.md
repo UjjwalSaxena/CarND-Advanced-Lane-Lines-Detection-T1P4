@@ -117,106 +117,52 @@ These are some examples for the lane detected test images.
     10. We can also plot the windows using the cv2.rectangle() method.
 
 #### Calculation of radius, position of car from center, direction etc.
+
+Radius of curvature:
+
+    R= ((1+(2Ay+B)^2)^(3/2))/abs(2A) - Formula for radius of curvature.
+    However I used this formula after changing the x and y values to real world
+    dimensions using the assumption 
     
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
 
+Position of car from center:
+    
+    To find the position of car from center of the lane we need 2 things:
+    1. The car position- which is the center of the Image's horizontal dimension
+    2. Lane center- which can be found by taking the average of the x coordinates
+       of the left and right lane lines.
+    Once we get these two values we take there difference to get the deviation of the 
+    car from the center of the lane.
 
+Direction of steer:
+    
+    If car's x position is less than the lane center's x position, it's steering left
+    Otherwise it's steering right. Simple
 
 
 #### Pipeline
+Pipeline is necessary to join all the code segments to take in an image and give a final output image which has the lane plotted on it.
+Steps included in my image processing pipeline:
+     
+     1. Undistort the image from the pre-generated distortion correction matrix, we generated
+        using chessboard images.
+     2. warp the image(perspective transform)
+     3. Do the channel thresholding, sobel(magnitude/gradient) thresholding etc.
+     4. Get a binary Image with these filters applied on it.
+     5. Plot the lane lines
+     6. fill the lane with the color as is required and calculate the radius of curvature, position of car etc.
+     7. Unwarp the Image using the inversion matrix
+     8. Combine both the original and lane marked Image to get the final output.
+     9. mark details on the image like the radius of curvature, position of car etc.
+     10. return the Image.
 
-
-```python
-def Lane_pipeline(img):
-    undistorted_image= undistort(img)
-    warped_image,M= unwarp_image(undistorted_image)
-    image_S_channel= cv2.cvtColor(warped_image, cv2.COLOR_RGB2HLS)[:,:,2]
-    
-    imgY, imgCr, imgb, imgS= Custom_channel_converter(warped_image)
-    
-    Ybinary= channelwise_thresholding(imgY,(215,255))
-    Crbinary= channelwise_thresholding(imgCr,(215,255))
-    Lbinary= channelwise_thresholding(imgb,(215,255))
-    Sbinary= channelwise_thresholding(imgS,(200,255))
-    combined = np.zeros_like(imgY)
-    
-#     sobel_mag_image= sobel_mag(image_S_channel, (15,60), False)
-    sobel_image1= sobel_image(image_S_channel,'x', 15,60, False)
-    sobel_grad_image= sobel_gradient_image(image_S_channel,  (0.5,1.8), False)
-    combined[(Crbinary==1)|(Ybinary==1)|((Lbinary==1)&(Sbinary==1))] = 1
-#     |((sobel_image1==1) & (sobel_grad_image==1))
-#     plt.imshow(combined)
-#     combined[]=1
-    
-#     |((sobel_image1==1)&(sobel_grad_image==1))
-#     ((sobel_mag_image == 1) & (sobel_grad_image == 0))
-    
-#     out_img,out_img1, left_fitx,right_fitx,ploty,left_curverad,right_curverad,center_dist= Plot_line(combined)
-    out_img,out_img1, left_fitx,right_fitx,ploty,left_fit, right_fit,left_lane_inds,right_lane_inds,lane_width= Plot_line(combined)
-    curverad,center_dist,width_lane,lane_center_position= calc_radius_position(combined,left_fit, right_fit,left_lane_inds,right_lane_inds,lane_width)
-    laneImage,new_img =draw_lane(img, combined, left_fitx, right_fitx, M)
-    unwarped_image= reverse_warping(laneImage,M)
-    laneImage = cv2.addWeighted(new_img, 1, unwarped_image, 0.5, 0)
-    laneImage, copy = Plot_details(laneImage,curverad,center_dist,width_lane,lane_center_position)
-    return img,out_img,out_img1,unwarped_image,laneImage,combined,copy
-
-    
-```
-
-#### Testing the pipeline on test images
-
-
-```python
-f,axes= plt.subplots(4,4, figsize=(20,20))
-row=0
-
-for index in range(4):
-    image= test_images[index]
-    image= ConvertBGRtoRGB(image)
-    rgb_image,out_img,out_img1,unwarped_image,laneImage,combined,copy= Lane_pipeline(image)
-    
-    axes[row,0].imshow(rgb_image)
-    axes[row,1].imshow(combined, cmap='gray')
-    axes[row,2].imshow(out_img1)
-    axes[row,3].imshow(laneImage)
-    row+=1
-```
-
+Below are few examples of the test images processed by the pipeline.
 
 ![png](output_49_0.png)
 
 
-#### Function calling pipeline for Video Creation
-
-
-```python
-def CallPipeline(image):
-    rgb_image,out_img,out_img1,unwarped_image,laneImage,combined,data_copy= Lane_pipeline(image)
-
-    out_image = np.zeros((720,1280,3), dtype=np.uint8)
-    
-    #stacking up various images in one output Image
-    out_image[0:420,0:800,:] = cv2.resize(laneImage,(800,420)) #top-left
-    out_image[0:360,800:1280,:] = cv2.resize(np.dstack((combined*255, combined*255, combined*255)),(480,360))#top-right
-    out_image[360:720,800:1280,:] = cv2.resize(out_img,(480,360))#bottom-right
-    out_image[420:720,0:800,:] = cv2.resize(data_copy,(800,300))#bottom-left
-    return out_image
-
-
-```
-
-#### Video Processing
-
-
-```python
-
-video_output1 = 'project_video_output.mp4'
-video_input1 = VideoFileClip('project_video.mp4').subclip(24,30)
-processed_video = video_input1.fl_image(CallPipeline)
-%time processed_video.write_videofile(video_output1, audio=False)
-```
-
-    [MoviePy] >>>> Building video project_video_output.mp4
-    [MoviePy] Writing video project_video_output.mp4
-    
-
-     53%|██████████████████████████████████████████▉                                      | 80/151 [00:27<00:23,  3.03it/s]
+#### Bad frames:
+![png](bad_frame1.png)
+![png](bad_frame2.png)
