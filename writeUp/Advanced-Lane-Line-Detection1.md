@@ -166,5 +166,8 @@ Below are few examples of the test images processed by the pipeline.
 
 
 #### Bad frames:
+The pipeline was not able to detect the lane lines properly at the farther end of the lane.
+It flickered a little at the top left corner of the lane.
+
 ![png](bad_frame1.png)
 ![png](bad_frame2.png)
