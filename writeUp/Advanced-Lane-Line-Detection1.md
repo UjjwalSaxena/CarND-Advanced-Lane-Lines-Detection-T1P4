@@ -8,6 +8,11 @@
 
 
 #### Camera Calibration
+Camera Calibration is a necessary step before processing Images taken by the camera.
+Every Camera has some irregularities and tend to distort images to some extent. This can be due to the uneven curvature,
+material of lens, environment irregularities etc.
+
+So after loading the images we calibrate the camera with them. Open CV provides some handy functions like findChessboardCorners, drawChessboardCorners and calibrateCamera to help us do this.
 
     Images after plotting chessboard corners
     
@@ -21,7 +26,8 @@
 
 #### Undistortion
 
-    Some Images after Distortion Correction. These are some examples of the undistorted Images
+Images can be undistorted using the undistort() method and the distortion matrix geretarated by the calibrateCamera method. 
+Some Images after Distortion Correction. These are some examples of the undistorted Images
 
 ![png](output_8_1.png)
 
@@ -39,10 +45,6 @@
     
 I tried converting the Image to various color spaces for detecting the lane lines better. I tried RGB, HSV, HLS, Lab and YCrCb color spaces.
     
-
-    
-
-
 ![png](output_12_0.png)
 
 
