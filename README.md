@@ -8,7 +8,7 @@ The first step in this process is to undistort the camera.
 #### Distorted Chess Board Images
     
 
-![png](output_3_1.png)
+![png](writeUp/output_3_1.png)
 
 
 #### Camera Calibration
@@ -20,12 +20,12 @@ So after loading the images we calibrate the camera with them. Open CV provides 
 
     Images after plotting chessboard corners
     
-![png](output_5_1.png)
+![png](writeUp/output_5_1.png)
 
 
     Original and calibrated images
 
-![png](output_6_1.png)
+![png](writeUp/output_6_1.png)
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 To calibrate the camera, First of all I imported the chessboard Images, and found their corners using the findChessboardCorners method. I also initialized the obj point as objp[:,:2]= np.mgrid[0:nx,0:ny].T.reshape(-1,2)
@@ -36,14 +36,14 @@ I kept finding corners and appended them to an array imgpoints and obj point to 
 In cell 6 I used the same matrix to undistort some test Images too
 These are some Images after Distortion Correction.
 
-![png](output_8_1.png)
+![png](writeUp/output_8_1.png)
 
 
 #### Experimenting on various color spaces
     
 I tried converting the Image to various color spaces for detecting the lane lines better. I tried RGB, HSV, HLS, Lab and YCrCb color spaces.
     
-![png](output_12_0.png)
+![png](writeUp/output_12_0.png)
 
 Out of the all the channels visualized above, S and L channel from HLS, Y and Cr channel from YCrCb colorspace look promising and are able to identify the lane lines easily, which are too bright to identify in the original image itself.
 I chose these color channels because after combining they were easily able to detect the lane lines and were almost free from noise.
@@ -52,14 +52,14 @@ I chose these color channels because after combining they were easily able to de
 #### Experimenting with selected color channels (Y,Cr,L and S)
 
 I tried to experiment more with the selected color channels just to be sure that they work on all kind of Imgaes, whether bright or dark or with shadows. I tried images with different road texture too.
-![png](output_17_0.png)
+![png](writeUp/output_17_0.png)
 
 
 #### Sobel x and y
 
 I experimented on Sobel operator to check if it helps in identifying the lane lines. These are some examples of Sobel x applied on the warped images
 
-![png](output_20_0.png)
+![png](writeUp/output_20_0.png)
 
 
 If Images are not properly warped, the left lane line is completely getting misidentified. Sobel identifies road edge as the lane line. This is due to the low contrast between lane line and the bright road in these two images. However this gets better after removing the road edge from the warped picture.
@@ -68,7 +68,7 @@ If Images are not properly warped, the left lane line is completely getting misi
 
 These are some pictures of experimentation on the warped Images using sobel magnitude
 
-![png](output_24_0.png)
+![png](writeUp/output_24_0.png)
 
 
     I can't see any improvement in lane detection using sobel magnitude also. 
@@ -79,7 +79,7 @@ These are some pictures of experimentation on the warped Images using sobel magn
 
 These are some images of experimentation using sobel gradient. I tried to filter out some noise using the arctan operator to reduce the near horizontal lines from the Image, however this introduced a lot of noise of its own. 
 
-![png](output_28_0.png)
+![png](writeUp/output_28_0.png)
 
 
     Gradient sobel in itself doesn't looks good enough to detect lane lines.
@@ -91,7 +91,7 @@ These are some images of experimentation using sobel gradient. I tried to filter
 
 I tried combining sobel techniques and channel thresholds to get the binary image of detected lanes but finally deduced that lanes get detected best using the color channels and hence went with channel thresholding for lane detection.
 
-![png](output_31_0.png)
+![png](writeUp/output_31_0.png)
 
 
 
@@ -118,7 +118,7 @@ Steps included in my image processing pipeline:
 #### 1. Provide an example of a distortion-corrected image.
 
 To undistort the image I used the same matrix created by the cv2.calibrateCamera method. cv2.undistort method is used for undistorting and image.
-![png](undistorted.png)
+![png](writeUp/undistorted.png)
 
 #### 2. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 For warping the Image I created a function called warp_image() in the cell 7 of notebook. This uses the value of src and dst which I have defined to be 
@@ -127,7 +127,7 @@ For warping the Image I created a function called warp_image() in the cell 7 of 
     These are some examples of the perspective transformed Images
     
 
-![png](warp.png)
+![png](writeUp/warp.png)
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
@@ -147,7 +147,7 @@ I took 200 as the offset value to zoom in or zoom out the image on the x axis.
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
-![png](output_10_0.png)
+![png](writeUp/output_10_0.png)
 
 #### 3. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
@@ -170,7 +170,7 @@ I used some color transforms like RGB2HLS and RGB2YCrCb. I tried with various co
 
 This code is written in cell 10 of the notebook
 
-![png](binaryImage.png)
+![png](writeUp/binaryImage.png)
 
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
@@ -191,14 +191,14 @@ I created a **plot_line()** function in the code to find the lane pixels using t
     9. The last step is to plot these lines using any suitable python libraries.
     10. We can also plot the windows using the cv2.rectangle() method.
     
-![png](slidingwindow.png)
+![png](writeUp/slidingwindow.png)
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 I used the sliding window approach for detecting the lane lines and used Udacity's code for plotting the lines on the test Images.
 These are some examples for the lane detected test images.
 
-![png](output_35_0.png)
+![png](writeUp/output_35_0.png)
 
 
 
@@ -230,17 +230,17 @@ Direction of steer:
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 
-![png](lane.png)
+![png](writeUp/lane.png)
 Below are few examples of the test images processed by the pipeline.
-![png](output_49_0.png)
+![png](writeUp/output_49_0.png)
 
 
 #### Bad frames:
 The pipeline was not able to detect the lane lines properly at the farther end of the lane.
 It flickered a little at the top left corner of the lane.
 
-![png](bad_frame1.png)
-![png](bad_frame2.png)
+![png](writeUp/bad_frame1.png)
+![png](writeUp/bad_frame2.png)
 
 #### Problems faced during the project
 There were a lot of challenges in the project. I have enlisted some of them with the solutions I found for them.
