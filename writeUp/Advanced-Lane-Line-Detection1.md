@@ -118,7 +118,7 @@ Steps included in my image processing pipeline:
 #### 1. Provide an example of a distortion-corrected image.
 
 To undistort the image I used the same matrix created by the cv2.calibrateCamera method. cv2.undistort method is used for undistorting and image.
-![png][undistorted.png]
+![png](undistorted.png)
 
 #### 2. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 For warping the Image I created a function called warp_image() in the cell 7 of notebook. This uses the value of src and dst which I have defined to be 
@@ -127,7 +127,7 @@ For warping the Image I created a function called warp_image() in the cell 7 of 
     These are some examples of the perspective transformed Images
     
 
-![png][warp.png]
+![png](warp.png)
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
@@ -170,7 +170,7 @@ I used some color transforms like RGB2HLS and RGB2YCrCb. I tried with various co
 
 This code is written in cell 10 of the notebook
 
-![png][binaryImage.png]
+![png](binaryImage.png)
 
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
@@ -191,7 +191,7 @@ I created a **plot_line()** function in the code to find the lane pixels using t
     9. The last step is to plot these lines using any suitable python libraries.
     10. We can also plot the windows using the cv2.rectangle() method.
     
-![png][slidingwindow.png]
+![png](slidingwindow.png)
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
